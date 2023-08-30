@@ -1,8 +1,8 @@
 extern crate xmlrpc;
 
 use clap::Parser;
-use std::io;
-use utils::CliArgs;
+use std::{collections::HashMap, io};
+use utils::{print_help, CliArgs};
 use xapi::xapi::Xapi;
 
 use crate::utils::str_to_vec;
@@ -20,39 +20,64 @@ fn main() {
     );
     xapi.connect();
 
-    println!("Welcome to the XAPI CLI!");
-    println!("Please enter a method from the XAPI.");
-    println!(
-        "If the method requires parameters, use the format: <method> [<param1>, <param2>, ...]"
-    );
-    println!("For example: VM.send_sysrq [OpaqueRef:023d46a3-ed95-489d-be64-6773ccd71477,b]");
-    println!("To quit, type 'exit'.");
-    println!();
+    print_help();
+
     loop {
+        println!("Enter a method:");
+
         let mut input = String::new();
         io::stdin()
             .read_line(&mut input)
             .expect("Failed to read input");
 
-        let _method = input.trim();
+        let trimmed_input = input.trim();
 
-        if _method == "exit" {
+        if trimmed_input == "exit" {
             println!("Exiting the XAPI CLI. Goodbye!");
             break;
-        } else {
-            let mut split = _method.split(" ");
-            let mut params = vec![];
-
-            let method = split.next().unwrap();
-            if let Some(value) = split.next() {
-                println!("{value}");
-                params = str_to_vec(value);
-            }
-
-            println!("{:#?}", xapi.call(method, params));
         }
 
-        println!("Enter a method:");
+        let mut split = trimmed_input.split(" ");
 
+        let mut params = vec![];
+        let mut filters = vec![];
+
+        let method = split.next().unwrap();
+
+        for mut value in split {
+            value = value.trim();
+            let inner_value = &value[1..value.len() - 1];
+
+            match value.chars().next() {
+                Some('[') => params = str_to_vec(inner_value),
+                Some('{') => filters = str_to_vec(inner_value),
+                _ => println!("Unknown param: {}", value),
+            }
+        }
+
+        let call_result = xapi.call(method, params);
+
+        if filters.is_empty() || call_result.is_err() {
+            println!("{:#?}", call_result);
+            continue;
+        }
+
+        let unwrapped_result = call_result.unwrap();
+        let response_struct = unwrapped_result.as_struct();
+
+        match response_struct {
+            Some(resp) => {
+                let mut filtered_results = HashMap::new();
+
+                for filter in filters {
+                    filtered_results.insert(filter, resp.get(filter));
+                }
+                println!("{:#?}", filtered_results);
+            }
+            _ => {
+                println!("Cannot filter result");
+                println!("{:#?}", unwrapped_result);
+            }
+        }
     }
 }
