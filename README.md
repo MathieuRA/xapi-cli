@@ -1,6 +1,15 @@
 # XAPI CLI
 
-This is a command-line interface (CLI) for interacting with the XenServer API (XAPI). It allows you to execute XAPI methods, optionally providing parameters, in a simple interactive manner.
+This is a command-line interface (CLI) for interacting with the Xen API (XAPI). It allows you to execute XAPI methods, optionally providing parameters, in a simple interactive manner.
+
+## TODO
+
+- [ ] Handle arrow up/down/left/right
+- [ ] Retry if invalid password
+- [ ] Help method that display the helper
+- [ ] Handle args passed in a string. ["opaqueRef:.."] and [opaqueRef:..] should not throw any error
+- [ ] Better display of Success/Error. Maybe only show the result in green/red?
+- [ ] Release the V1
 
 ## Getting Started
 
