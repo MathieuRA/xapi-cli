@@ -43,7 +43,7 @@ The CLI will prompt you to enter [XAPI methods](https://xapi-project.github.io/x
 
 This project uses the following Rust crates:
 
-- `xmlrpc`: For XML-RPC communication with the XenServer API.
+- `xmlrpc`: For XML-RPC communication with the Xen API.
 - `clap`: For command-line argument parsing.
 
 ## Contributing
