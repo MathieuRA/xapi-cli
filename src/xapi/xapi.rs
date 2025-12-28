@@ -1,4 +1,6 @@
 extern crate xmlrpc;
+use std::io;
+
 use xmlrpc::Request;
 use xmlrpc::Value;
 
@@ -48,7 +50,7 @@ impl Xapi {
         self._call(method, params, false)
     }
 
-    pub fn connect(&mut self) -> Result<(), Value> {
+    fn connect(&mut self) -> Result<(), Value> {
         let params = vec![self.username.as_str(), self.password.as_str()];
         let session_ref = self._call("session.login_with_password", params, true);
 
@@ -58,6 +60,33 @@ impl Xapi {
         }
 
         Err(session_ref.err().unwrap())
+    }
+
+    pub fn connect_with_user_input(&mut self) {
+        while !self.is_connected() {
+            let connect_result = self.connect();
+            if connect_result.is_ok() {
+                return;
+            }
+
+            println!("Failed to connect to the XAPI: {}", self.get_full_url());
+            println!("{:?}", connect_result.err().unwrap());
+
+            let mut username_input = String::new();
+            println!("Please provide a valid username");
+            io::stdin()
+                .read_line(&mut username_input)
+                .expect("Failed to read username");
+
+            let mut password_input = String::new();
+            println!("Please provide a valid password");
+            io::stdin()
+                .read_line(&mut password_input)
+                .expect("Failed to read password");
+
+            self.username = username_input.trim().to_string();
+            self.password = password_input.trim().to_string();
+        }
     }
 
     pub fn new(url: String, username: String, password: String) -> Xapi {
@@ -70,7 +99,7 @@ impl Xapi {
         }
     }
 
-    pub fn is_connected(&self) -> bool {
+    fn is_connected(&self) -> bool {
         self.session_ref.is_some()
     }
 }
