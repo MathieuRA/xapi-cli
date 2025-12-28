@@ -11,7 +11,7 @@ pub struct Xapi {
 }
 
 impl Xapi {
-    fn get_full_url(&self) -> String {
+    pub fn get_full_url(&self) -> String {
         format!("{}/{}", self.url, "xmlrpc")
     }
 
@@ -30,18 +30,17 @@ impl Xapi {
             request = request.arg(param);
         }
 
-        let response = request.call_url(self.get_full_url()).expect(
-            format!(
-                "An error has occurred during the API call using the method: {}",
-                method
-            )
-            .as_str(),
-        );
+        let response = request.call_url(self.get_full_url());
 
-        if let Some(result) = response.get("Value") {
+        if response.is_err() {
+            return Err(Value::String(response.err().unwrap().to_string()));
+        }
+
+        let resp = response.ok().unwrap();
+        if let Some(result) = resp.get("Value") {
             Ok(result.clone())
         } else {
-            Err(response)
+            Err(resp)
         }
     }
 
@@ -49,13 +48,16 @@ impl Xapi {
         self._call(method, params, false)
     }
 
-    pub fn connect(&mut self) -> () {
+    pub fn connect(&mut self) -> Result<(), Value> {
         let params = vec![self.username.as_str(), self.password.as_str()];
-        let session_ref = self
-            ._call("session.login_with_password", params, true)
-            .expect("An error as occured during: 'session.login_with_password'");
+        let session_ref = self._call("session.login_with_password", params, true);
 
-        self.session_ref = Some(session_ref.as_str().unwrap().to_string());
+        if let Ok(session) = session_ref {
+            self.session_ref = Some(session.as_str().unwrap().to_string());
+            return Ok(());
+        }
+
+        Err(session_ref.err().unwrap())
     }
 
     pub fn new(url: String, username: String, password: String) -> Xapi {

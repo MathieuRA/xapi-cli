@@ -13,12 +13,34 @@ mod xapi;
 fn main() {
     let args = CliArgs::parse();
 
-    let mut xapi = Xapi::new(
-        String::from(args.url),
-        String::from(args.username),
-        String::from(args.password),
-    );
-    xapi.connect();
+    let mut xapi = Xapi::new(args.url.clone(), args.username, args.password);
+
+    while !xapi.is_connected() {
+        println!("inside the loop!");
+        let connect_result = xapi.connect();
+        if connect_result.is_err() {
+            println!("Failed to connect to the XAPI: {}", xapi.get_full_url());
+            println!("{:?}", connect_result.err().unwrap());
+
+            let mut username_input = String::new();
+            println!("Please provide a valid username");
+            io::stdin()
+                .read_line(&mut username_input)
+                .expect("Failed to read username");
+
+            let mut password_input = String::new();
+            println!("Please provide a valid password");
+            io::stdin()
+                .read_line(&mut password_input)
+                .expect("Failed to read password");
+
+            xapi = Xapi::new(
+                args.url.clone(),
+                String::from(username_input.trim()),
+                String::from(password_input.trim()),
+            );
+        }
+    }
 
     print_help();
 
