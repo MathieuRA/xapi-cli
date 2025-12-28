@@ -1,4 +1,5 @@
 use clap::Parser;
+use xmlrpc::Value;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -32,4 +33,44 @@ pub fn print_help() {
     println!();
     println!("To quit, type 'exit'.");
     println!();
+}
+pub fn to_json_string(value: &Value, indent: usize) -> String {
+    let pad = "  ".repeat(indent);
+
+    match value {
+        Value::String(s) => format!("\"{}\"", s),
+        Value::Int(i) => i.to_string(),
+        Value::Bool(b) => b.to_string(),
+        Value::Double(d) => d.to_string(),
+        Value::Array(arr) => {
+            if arr.is_empty() {
+                "[]".to_string()
+            } else {
+                let mut result = "[\n".to_string();
+                for v in arr {
+                    result.push_str(&format!("{}  {},\n", pad, to_json_string(v, indent + 1)));
+                }
+                result.push_str(&format!("{}]", pad));
+                result
+            }
+        }
+        Value::Struct(map) => {
+            if map.is_empty() {
+                "{}".to_string()
+            } else {
+                let mut result = "{\n".to_string();
+                for (k, v) in map {
+                    result.push_str(&format!(
+                        "{}  \"{}\": {},\n",
+                        pad,
+                        k.replace('"', "\\\""),
+                        to_json_string(v, indent + 1)
+                    ));
+                }
+                result.push_str(&format!("{}}}", pad));
+                result
+            }
+        }
+        _ => String::from("null"),
+    }
 }

@@ -1,11 +1,12 @@
 extern crate xmlrpc;
 
 use clap::Parser;
-use std::{collections::HashMap, io};
+use std::{collections::BTreeMap, io};
 use utils::{print_help, CliArgs};
 use xapi::xapi::Xapi;
+use xmlrpc::Value;
 
-use crate::utils::str_to_vec;
+use crate::utils::{str_to_vec, to_json_string};
 
 mod r#macro;
 mod utils;
@@ -58,8 +59,17 @@ fn main() {
 
         let call_result = xapi.call(method, params);
 
-        if filters.is_empty() || call_result.is_err() {
-            println!("{:#?}", call_result);
+        if filters.is_empty() {
+            match call_result {
+                Err(err) => {
+                    println_err!("Error calling method {}:", method);
+                    println_err!("{}", to_json_string(&err, 0));
+                }
+                Ok(result) => {
+                    println_success!("Result of method {}:", method);
+                    println!("{}", to_json_string(&result, 0));
+                }
+            }
             continue;
         }
 
@@ -68,16 +78,24 @@ fn main() {
 
         match response_struct {
             Some(resp) => {
-                let mut filtered_results = HashMap::new();
+                let mut filtered_results = BTreeMap::new();
 
                 for filter in filters {
-                    filtered_results.insert(filter, resp.get(filter));
+                    let value = if let Some(v) = resp.get(filter) {
+                        v.clone()
+                    } else {
+                        Value::Nil
+                    };
+
+                    filtered_results.insert(filter.to_string(), value);
                 }
-                println!("{:#?}", filtered_results);
+
+                let value_struct = Value::Struct(filtered_results);
+                println!("{}", to_json_string(&value_struct, 0));
             }
             _ => {
                 println_warn!("Cannot filter result");
-                println!("{:#?}", unwrapped_result);
+                println!("{}", to_json_string(&unwrapped_result, 0));
             }
         }
     }

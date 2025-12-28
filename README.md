@@ -7,11 +7,14 @@ This is a command-line interface (CLI) for interacting with the Xen API (XAPI). 
 - [ ] Handle arrow up/down/left/right
 - [x] Retry if invalid password
 - [x] Help method that display the helper
-- [ ] Handle args passed in a string. ["opaqueRef:.."] and [opaqueRef:..] should not throw any error
 - [x] Better display of Success/Error.
+- [x] Display result as JSON
 - [ ] Use async call to avoid timeout issues
 - [ ] Release the V1
 
+## TODO for futur release
+
+add --output=array to display in an array instead of JSON
 ## Getting Started
 
 To use this CLI, you'll need to have Rust installed on your system. If you haven't already, you can install Rust by following the instructions at [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install).
