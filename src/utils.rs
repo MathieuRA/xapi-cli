@@ -33,27 +33,3 @@ pub fn print_help() {
     println!("To quit, type 'exit'.");
     println!();
 }
-
-macro_rules! println_color {
-    ($color:expr, $($arg:tt)*) => {{
-        println!("\x1b[{}m{}\x1b[0m", $color, format!($($arg)*));
-    }};
-}
-
-macro_rules! println_err {
-    ($($arg:tt)*) => {
-        println_color!(91, $($arg)*);
-    };
-}
-
-macro_rules! println_success {
-    ($($arg:tt)*) => {
-        println_color!(92, $($arg)*);
-    };
-}
-
-macro_rules! println_info {
-    ($($arg:tt)*) => {
-        println_color!(94, $($arg)*);
-    };
-}
