@@ -7,6 +7,7 @@ use xapi::xapi::Xapi;
 
 use crate::utils::str_to_vec;
 
+mod r#macro;
 mod utils;
 mod xapi;
 
@@ -18,7 +19,7 @@ fn main() {
     print_help();
 
     loop {
-        println!("Enter a method:");
+        println_info!("Enter a method:");
 
         let mut input = String::new();
         io::stdin()
@@ -28,7 +29,7 @@ fn main() {
         let trimmed_input = input.trim();
 
         if trimmed_input == "exit" {
-            println!("Exiting the XAPI CLI. Goodbye!");
+            println_info!("Exiting the XAPI CLI. Goodbye!");
             break;
         }
 
@@ -75,7 +76,7 @@ fn main() {
                 println!("{:#?}", filtered_results);
             }
             _ => {
-                println!("Cannot filter result");
+                println_warn!("Cannot filter result");
                 println!("{:#?}", unwrapped_result);
             }
         }

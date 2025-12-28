@@ -4,6 +4,10 @@ use std::io;
 use xmlrpc::Request;
 use xmlrpc::Value;
 
+use crate::println_err;
+use crate::println_info;
+use crate::println_success;
+
 pub struct Xapi {
     url: String,
     username: String,
@@ -66,20 +70,24 @@ impl Xapi {
         while !self.is_connected() {
             let connect_result = self.connect();
             if connect_result.is_ok() {
+                println_success!(
+                    "Successfully connected to the XAPI: {}",
+                    self.get_full_url()
+                );
                 return;
             }
 
-            println!("Failed to connect to the XAPI: {}", self.get_full_url());
-            println!("{:?}", connect_result.err().unwrap());
+            println_err!("Failed to connect to the XAPI: {}", self.get_full_url());
+            println_err!("{:?}", connect_result.err().unwrap());
 
             let mut username_input = String::new();
-            println!("Please provide a valid username");
+            println_info!("Please provide a valid username");
             io::stdin()
                 .read_line(&mut username_input)
                 .expect("Failed to read username");
 
             let mut password_input = String::new();
-            println!("Please provide a valid password");
+            println_info!("Please provide a valid password");
             io::stdin()
                 .read_line(&mut password_input)
                 .expect("Failed to read password");

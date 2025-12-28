@@ -8,7 +8,7 @@ This is a command-line interface (CLI) for interacting with the Xen API (XAPI). 
 - [x] Retry if invalid password
 - [x] Help method that display the helper
 - [ ] Handle args passed in a string. ["opaqueRef:.."] and [opaqueRef:..] should not throw any error
-- [ ] Better display of Success/Error. Maybe only show the result in green/red?
+- [x] Better display of Success/Error.
 - [ ] Use async call to avoid timeout issues
 - [ ] Release the V1
 
