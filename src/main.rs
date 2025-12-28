@@ -59,6 +59,11 @@ fn main() {
             break;
         }
 
+        if trimmed_input == "help" {
+            print_help();
+            continue;
+        }
+
         let mut split = trimmed_input.split(" ");
 
         let mut params = vec![];
